@@ -1,6 +1,12 @@
 import { Link } from "react-router-dom";
 
 function Header({ cart }) {
+
+  const totalItems = cart.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
+
   return (
     <header className="header">
 
@@ -9,36 +15,42 @@ function Header({ cart }) {
       </div>
 
       <nav className="navbar">
-        <Link to="/">Home</Link>
-        <Link to="/products">Products</Link>
-        <Link to="/about">About</Link>
-        <Link to="/contact">Contact</Link>
+
+        <Link to="/">
+          Home
+        </Link>
+
+        <Link to="/products">
+          Products
+        </Link>
+
+        <Link to="/about">
+          About
+        </Link>
+
+        <Link to="/contact">
+          Contact
+        </Link>
+
       </nav>
 
       <Link to="/cart" className="cart-btn">
 
-    
+        <span className="cart-icon">
 
-   <span className="cart-icon">
-  🛒
+          🛒
 
-  {cart.length > 0 && (
-    <span className="cart-count">
-      {cart.length}
-    </span>
-  )}
-</span>
-    
+          {totalItems > 0 && (
+            <span className="cart-count">
+              {totalItems}
+            </span>
+          )}
 
-          
+        </span>
 
-       
-
-          
-
-       
-
-        <span>Cart</span>
+        <span>
+          Cart
+        </span>
 
       </Link>
 
