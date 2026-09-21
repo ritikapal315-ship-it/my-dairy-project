@@ -1,9 +1,45 @@
-function Cart({ cart }) {
+function Cart({ cart, updateQuantity, removeFromCart }) {
   return (
-    <div>
+    <div className="cart-page">
+
       <h1>My Cart</h1>
 
-     <p>Cart data: {JSON.stringify(cart)}</p>
+      <p>Total Items: {cart.length}</p>
+
+      {cart.length === 0 ? (
+        <p>Your cart is empty.</p>
+      ) : (
+        <div className="cart-items">
+
+          {cart.map((item, index) => (
+            <div className="cart-item" key={index}>
+
+              <h2>{item.name}</h2>
+
+              <div className="quantity-controls">
+
+                <button onClick={() => updateQuantity(index, -1)}>
+                  -
+                </button>
+
+                <span>{item.quantity}</span>
+
+                <button onClick={() => updateQuantity(index, 1)}>
+                  +
+                </button>
+
+                <button onClick={() => removeFromCart(index)}>
+                  Remove
+                </button>
+
+              </div>
+
+            </div>
+          ))}
+
+        </div>
+      )}
+
     </div>
   );
 }
