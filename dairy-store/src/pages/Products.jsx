@@ -25,7 +25,9 @@ function Products({ cart, setCart }) {
 
           <button
             className="add-cart-btn"
-            onClick={() => setCart([...cart, "Milk"])}
+            onClick={() =>
+               setCart([...cart, { name: "Milk", quantity: 1 }])
+              }
           >
             Add to Cart
           </button>
@@ -39,7 +41,9 @@ function Products({ cart, setCart }) {
 
           <button
             className="add-cart-btn"
-            onClick={() => setCart([...cart, "Curd"])}
+            onClick={() =>
+                 setCart([...cart, { name: "Curd", quantity: 1 }])
+             }
           >
             Add to Cart
           </button>
@@ -53,7 +57,9 @@ function Products({ cart, setCart }) {
 
           <button
             className="add-cart-btn"
-            onClick={() => setCart([...cart, "Paneer"])}
+            onClick={() =>
+               setCart([...cart, { name: "Paneer", quantity: 1 }])
+              }
           >
             Add to Cart
           </button>
@@ -67,7 +73,9 @@ function Products({ cart, setCart }) {
 
           <button
             className="add-cart-btn"
-            onClick={() => setCart([...cart, "Butter"])}
+            onClick={() =>
+               setCart([...cart, { name: "Butter", quantity: 1 }])
+              }
           >
             Add to Cart
           </button>
@@ -81,7 +89,9 @@ function Products({ cart, setCart }) {
 
           <button
             className="add-cart-btn"
-            onClick={() => setCart([...cart, "Ghee"])}
+            onClick={() =>
+               setCart([...cart, { name: "Ghee", quantity: 1 }])
+              }
           >
             Add to Cart
           </button>
