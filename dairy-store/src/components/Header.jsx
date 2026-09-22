@@ -6,6 +6,12 @@ function Header({ cart }) {
     (total, item) => total + item.quantity,
     0
   );
+  const loggedInUser = localStorage.getItem("loggedInUser");
+   function handleLogout() {
+    localStorage.removeItem("loggedInUser");
+
+    alert("Logged out successfully!");
+  }
 
   return (
     <header className="header">
@@ -31,7 +37,17 @@ function Header({ cart }) {
         <Link to="/contact">
           Contact
         </Link>
-
+        {loggedInUser ? (
+  <button onClick={handleLogout}>
+    Logout
+  </button>
+) : (
+  <>
+    <Link to="/login">Login</Link>
+    <Link to="/signup">Sign Up</Link>
+  </>
+)}
+        
       </nav>
 
       <Link to="/cart" className="cart-btn">

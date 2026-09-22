@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./App.css";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import Header from "./components/Header";
 import Home from "./pages/Home";
@@ -8,6 +9,8 @@ import Cart from "./pages/Cart";
 import Footer from "./components/Footer";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import Signup from "./pages/Signup";
+import Login from "./pages/Login";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
@@ -69,6 +72,14 @@ function App() {
 
       <Routes>
         <Route
+           path="/signup"
+           element={<Signup />}
+        />
+        <Route
+            path="/login"
+            element={<Login />}
+        />
+        <Route
              path="/about"
             element={<About />}
          />
@@ -83,25 +94,26 @@ function App() {
           element={<Home />}
         />
 
-       <Route
+ <Route
   path="/products"
   element={
-    <Products
-      addToCart={addToCart}
-    />
+    <ProtectedRoute>
+      <Products />
+    </ProtectedRoute>
   }
 />
+  
 
         <Route
-          path="/cart"
-          element={
-            <Cart
-              cart={cart}
-              updateQuantity={updateQuantity}
-              removeFromCart={removeFromCart}
-            />
-          }
-        />
+  path="/cart"
+  element={
+    <ProtectedRoute>
+      <Cart />
+    </ProtectedRoute>
+  }
+/>
+          
+        
 
       </Routes>
 
