@@ -17,7 +17,7 @@
 
 .navbar {
   display: flex;
-  gap: 35px;
+  gap: 50px;
 }
 
 .navbar a {
