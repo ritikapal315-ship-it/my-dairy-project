@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
+
 
 function Header({ cart }) {
 
@@ -6,10 +8,13 @@ function Header({ cart }) {
     (total, item) => total + item.quantity,
     0
   );
-  const loggedInUser = localStorage.getItem("loggedInUser");
+const [loggedInUser, setLoggedInUser] = useState(
+  localStorage.getItem("loggedInUser")
+);
+console.log("Logged in user:", loggedInUser);
    function handleLogout() {
     localStorage.removeItem("loggedInUser");
-
+     setLoggedInUser(null);
     alert("Logged out successfully!");
   }
 
@@ -27,7 +32,8 @@ function Header({ cart }) {
         </Link>
 
         <Link to="/products">
-          Products
+        
+        Products
         </Link>
 
         <Link to="/about">
@@ -37,6 +43,8 @@ function Header({ cart }) {
         <Link to="/contact">
           Contact
         </Link>
+        <Link to="/my-products">My Wishes Product</Link>
+       
         {loggedInUser ? (
   <button onClick={handleLogout}>
     Logout

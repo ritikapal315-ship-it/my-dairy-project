@@ -11,6 +11,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
+import MyProducts from "./pages/MyProducts";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
@@ -67,8 +68,10 @@ function App() {
 
   return (
     <BrowserRouter>
+     <div className="app">
 
       <Header cart={cart} />
+      <main className="main-content">
 
       <Routes>
         <Route
@@ -98,7 +101,7 @@ function App() {
   path="/products"
   element={
     <ProtectedRoute>
-      <Products />
+      <Products addToCart={addToCart}  />
     </ProtectedRoute>
   }
 />
@@ -108,7 +111,19 @@ function App() {
   path="/cart"
   element={
     <ProtectedRoute>
-      <Cart />
+      <Cart 
+      cart={cart}
+        updateQuantity={updateQuantity}
+        removeFromCart={removeFromCart} />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/my-products"
+  element={
+    <ProtectedRoute>
+   
+      <MyProducts />
     </ProtectedRoute>
   }
 />
@@ -116,10 +131,12 @@ function App() {
         
 
       </Routes>
+      </main>
 
 
 
       <Footer />
+      </div>
     </BrowserRouter>
   );
 }
