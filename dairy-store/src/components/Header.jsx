@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 
 
 function Header({ cart }) {
@@ -11,11 +11,13 @@ function Header({ cart }) {
 const [loggedInUser, setLoggedInUser] = useState(
   localStorage.getItem("loggedInUser")
 );
+const navigate = useNavigate();
 console.log("Logged in user:", loggedInUser);
    function handleLogout() {
     localStorage.removeItem("loggedInUser");
      setLoggedInUser(null);
     alert("Logged out successfully!");
+     navigate("/");
   }
 
   return (
