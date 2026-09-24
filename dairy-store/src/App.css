@@ -622,4 +622,59 @@
 
 .main-content {
   flex: 1;
+  
 }
+
+.ghee-page {
+  padding: 40px;
+  text-align: center;
+}
+
+.ghee-container {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.ghee-card {
+  width: 250px;
+  padding: 25px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+.ghee-image {
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 80px;
+  background-color: #f5f5f5;
+  border-radius: 10px;
+}
+
+.ghee-card h2 {
+  margin: 15px 0 8px;
+}
+
+.ghee-card p {
+  color: gray;
+}
+
+.ghee-card h3 {
+  font-size: 22px;
+}
+
+.ghee-card button {
+  padding: 10px 25px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+
+

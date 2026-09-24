@@ -12,6 +12,7 @@ import Contact from "./pages/Contact";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import MyProducts from "./pages/MyProducts";
+import GheePage from "./pages/GheePage";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
@@ -105,6 +106,7 @@ function App() {
     </ProtectedRoute>
   }
 />
+
   
 
         <Route
@@ -127,6 +129,7 @@ function App() {
     </ProtectedRoute>
   }
 />
+<Route path="/ghee" element={<GheePage />} />
           
         
 

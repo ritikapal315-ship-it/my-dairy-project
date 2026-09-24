@@ -46,6 +46,7 @@ console.log("Logged in user:", loggedInUser);
           Contact
         </Link>
         <Link to="/my-products">My Wishes Product</Link>
+        <Link to="/ghee">Ghee</Link>
        
         {loggedInUser ? (
   <button onClick={handleLogout}>
