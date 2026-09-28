@@ -1,4 +1,72 @@
+
+import {useEffect, useState } from "react";
+
 function Products({ addToCart }) {
+  const [wishlist, setWishlist] = useState([]);
+  const [category, setCategory] = useState("All");
+  useEffect(() => {
+  fetch("https://dummyjson.com/Products")
+    .then((response) => response.json())
+    .then((data) => {
+      console.log(data.Products);
+    });
+}, []);
+
+  const products = [
+    {
+      name: "Milk",
+      category: "Milk",
+      image: "🥛",
+      description: "Fresh and pure milk.",
+      price: "₹60 / litre"
+    },
+    {
+      name: "Curd",
+      category: "Curd",
+      image: "🥣",
+      description: "Fresh and creamy curd.",
+      price: "₹50 / 500g"
+    },
+    {
+      name: "Paneer",
+      category: "Paneer",
+      image: "🧀",
+      description: "Soft and fresh paneer.",
+      price: "₹250 / kg"
+    },
+    {
+      name: "Butter",
+      category: "Butter",
+      image: "🧈",
+      description: "Rich and creamy butter.",
+      price: "₹55 / 100g"
+    },
+    {
+      name: "Ghee",
+      category: "Ghee",
+      image: "🫙",
+      description: "Pure and healthy ghee.",
+      price: "₹550 / litre"
+    }
+  ];
+
+  const filteredProducts =
+    category === "All"
+      ? products
+      : products.filter(
+          (product) => product.category === category
+        );
+
+  const addToWishlist = (product) => {
+    setWishlist((prev) => {
+      if (prev.includes(product)) {
+        return prev;
+      }
+
+      return [...prev, product];
+    });
+  };
+
   return (
     <div className="products">
 
@@ -8,101 +76,102 @@ function Products({ addToCart }) {
         Fresh and healthy dairy products for you.
       </p>
 
+      {/* Filter Buttons */}
+      <div className="filter-buttons">
+
+        <button
+  className={category === "All" ? "active-filter" : ""}
+  onClick={() => setCategory("All")}
+>
+  All
+</button>
+  <button
+    className={category === "Milk" ? "active-filter" : ""}
+    onClick={() => setCategory("Milk")}
+  >
+    Milk
+  </button>
+
+  <button
+    className={category === "Curd" ? "active-filter" : ""}
+    onClick={() => setCategory("Curd")}
+  >
+    Curd
+  </button>
+
+  <button
+    className={category === "Paneer" ? "active-filter" : ""}
+    onClick={() => setCategory("Paneer")}
+  >
+    Paneer
+  </button>
+
+  <button
+    className={category === "Butter" ? "active-filter" : ""}
+    onClick={() => setCategory("Butter")}
+  >
+    Butter
+  </button>
+
+  <button
+    className={category === "Ghee" ? "active-filter" : ""}
+    onClick={() => setCategory("Ghee")}
+  >
+    Ghee
+  </button>
+
+
+        
+  
+        
+
+      </div>
+
+      {/* Product List */}
       <div className="product-list">
 
-        {/* Milk */}
-        <div className="product-card">
-          <div className="product-image">🥛</div>
+        {filteredProducts.map((product) => (
 
-          <h2>Milk</h2>
-
-          <p>Fresh and pure milk.</p>
-
-          <strong>₹60 / litre</strong>
-
-          <button
-            className="add-cart-btn"
-            onClick={() => addToCart("Milk")}
+          <div
+            className="product-card"
+            key={product.name}
           >
-            Add to Cart
-          </button>
-        </div>
 
+            {/* Wishlist */}
+            <button
+              className="wishlist-btn"
+              onClick={() => addToWishlist(product.name)}
+            >
+              {wishlist.includes(product.name)
+                ? "♥"
+                : "♡"}
+            </button>
 
-        {/* Curd */}
-        <div className="product-card">
-          <div className="product-image">🥣</div>
+            {/* Product Image */}
+            <div className="product-image">
+              {product.image}
+            </div>
 
-          <h2>Curd</h2>
+            {/* Product Name */}
+            <h2>{product.name}</h2>
 
-          <p>Fresh and creamy curd.</p>
+            {/* Description */}
+            <p>{product.description}</p>
 
-          <strong>₹50 / 500g</strong>
+            {/* Price */}
+            <strong>{product.price}</strong>
 
-          <button
-            className="add-cart-btn"
-            onClick={() => addToCart("Curd")}
-          >
-            Add to Cart
-          </button>
-        </div>
+            {/* Add To Cart */}
+            <button
+              className="add-cart-btn"
+              onClick={() => addToCart(product.name)}
+            >
+              Add to Cart
+            </button>
 
+          </div>
 
-        {/* Paneer */}
-        <div className="product-card">
-          <div className="product-image">🧀</div>
-
-          <h2>Paneer</h2>
-
-          <p>Soft and fresh paneer.</p>
-
-          <strong>₹250 / kg</strong>
-
-          <button
-            className="add-cart-btn"
-            onClick={() => addToCart("Paneer")}
-          >
-            Add to Cart
-          </button>
-        </div>
-
-
-        {/* Butter */}
-        <div className="product-card">
-          <div className="product-image">🧈</div>
-
-          <h2>Butter</h2>
-
-          <p>Rich and creamy butter.</p>
-
-          <strong>₹55 / 100g</strong>
-
-          <button
-            className="add-cart-btn"
-            onClick={() => addToCart("Butter")}
-          >
-            Add to Cart
-          </button>
-        </div>
-
-
-        {/* Ghee */}
-        <div className="product-card">
-          <div className="product-image">🫙</div>
-
-          <h2>Ghee</h2>
-
-          <p>Pure and healthy ghee.</p>
-
-          <strong>₹550 / litre</strong>
-
-          <button
-            className="add-cart-btn"
-            onClick={() => addToCart("Ghee")}
-          >
-            Add to Cart
-          </button>
-        </div>
+        ))}
 
       </div>
 
@@ -111,3 +180,4 @@ function Products({ addToCart }) {
 }
 
 export default Products;
+

@@ -675,6 +675,57 @@
   border-radius: 5px;
   cursor: pointer;
 }
+.product-card {
+  position: relative;
+}
+
+.wishlist-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+
+  width: 35px;
+  height: 35px;
+
+  border: none;
+  border-radius: 50%;
+  background: white;
+
+  font-size: 24px;
+  color: #777;
+  cursor: pointer;
+}
+
+.wishlist-btn:hover {
+  color: red;
+}
+.filter-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+.filter-buttons button {
+  padding: 10px 18px;
+  border: 1px solid #2e7d32;
+  border-radius: 6px;
+  background-color: white;
+  color: #2e7d32;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.filter-buttons button:hover {
+  background-color: #2e7d32;
+  color: white;
+}
+.filter-buttons .active-filter {
+  background-color: #2e7d32;
+  color: white;
+}
+
 
 
 
