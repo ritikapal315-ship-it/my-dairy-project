@@ -6,23 +6,34 @@ function Signup() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     if (password !== confirmPassword) {
       alert("Password and Confirm Password do not match!");
       return;
     }
-     const user = {
-    name: name,
-    email: email,
-    password: password,
-  };
+     
+  try {
+    const response = await fetch("http://localhost:5001/v1/create-user", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password })
+    });
 
-  localStorage.setItem("user", JSON.stringify(user));
+    const result = await response.json();
+
+    if (!response.ok) {
+      alert(result.message || "Signup failed");
+      return;
+    }
 
     alert("Account created successfully!");
+    window.location.href = "/login";
+  } catch (error) {
+    alert("Server se connect nahi ho paya");
   }
+}
 
   return (
     <div className="signup-page">
@@ -92,6 +103,6 @@ function Signup() {
       </div>
     </div>
   );
-}
 
+}
 export default Signup;
