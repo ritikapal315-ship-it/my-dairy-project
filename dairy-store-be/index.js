@@ -1,4 +1,5 @@
 require("dotenv").config();
+const productRoutes = require("./src/modules/products/product.route");
 const express = require("express");
 const cors = require("cors");
 const pool = require("./src/database/db");
@@ -15,6 +16,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/v1", userRoutes);
+app.use("/v1/products", productRoutes);
 
 // DB connect hone ke baad hi server start hoga
 pool

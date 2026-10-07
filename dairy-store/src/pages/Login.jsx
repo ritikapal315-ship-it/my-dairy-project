@@ -18,12 +18,13 @@ function Login() {
 
       const result = await response.json();
 
-      if (!response.ok) {
+      if (!response.ok) {               
         alert(result.message || "Login failed");
         return;
       }
 
       localStorage.setItem("loggedInUser", JSON.stringify(result.data));
+      localStorage.setItem("token", result.token);
       alert("Login successful!");
       navigate("/");
     } catch (error) {

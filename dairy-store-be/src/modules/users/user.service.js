@@ -1,3 +1,4 @@
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const userRepository = require("./user.repository");
 
@@ -81,8 +82,14 @@ const login = async ({ email, password }) => {
     throw err;
   }
 
-  const { password: _, ...safeUser } = user; // password hata do
-  return safeUser;
+  const token = jwt.sign(
+    { id: user.id, email: user.email },
+    process.env.JWT_SECRET,
+    { expiresIn: "1d" }
+  );
+
+  const { password: _, ...safeUser } = user;
+  return { user: safeUser, token };
 };
 
 module.exports = {

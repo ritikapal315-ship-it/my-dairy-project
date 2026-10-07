@@ -12,17 +12,16 @@ const createUser = async ({ name, email, password ,mobile_number,address}) => {
 };
 
 //UPDATE USER BY NAME
-const updateUser = async (id, { email , name}) => {
+const updateUser = async (id, { email, name }) => {
   const { rows } = await pool.query(
     `UPDATE users
-     SET email = $1,
-         name = $2,
+     SET email = COALESCE($1, email),
+         name = COALESCE($2, name),
          updated_at = CURRENT_TIMESTAMP
      WHERE id = $3
      RETURNING id, name, email, created_at, updated_at`,
-    [email?? null , name?? null, id]
+    [email ?? null, name ?? null, id]
   );
-
   return rows[0];
 };
 
