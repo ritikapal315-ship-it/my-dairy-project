@@ -1,75 +1,57 @@
+import { useEffect, useState } from "react";
 
-import {useEffect, useState } from "react";
+const categories = ["All", "Milk", "Curd", "Paneer", "Butter", "Ghee"];
+
+const emojiByName = {
+  milk: "🥛",
+  curd: "🥣",
+  paneer: "🧀",
+  butter: "🧈",
+  ghee: "🫙"
+};
 
 function Products({ addToCart }) {
   const [wishlist, setWishlist] = useState([]);
   const [category, setCategory] = useState("All");
-  useEffect(() => {
-  fetch("https://dummyjson.com/Products")
-    .then((response) => response.json())
-    .then((data) => {
-      console.log(data.Products);
-    });
-}, []);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const products = [
-    {
-      name: "Milk",
-      category: "Milk",
-      image: "🥛",
-      description: "Fresh and pure milk.",
-      price: "₹60 / litre"
-    },
-    {
-      name: "Curd",
-      category: "Curd",
-      image: "🥣",
-      description: "Fresh and creamy curd.",
-      price: "₹50 / 500g"
-    },
-    {
-      name: "Paneer",
-      category: "Paneer",
-      image: "🧀",
-      description: "Soft and fresh paneer.",
-      price: "₹250 / kg"
-    },
-    {
-      name: "Butter",
-      category: "Butter",
-      image: "🧈",
-      description: "Rich and creamy butter.",
-      price: "₹55 / 100g"
-    },
-    {
-      name: "Ghee",
-      category: "Ghee",
-      image: "🫙",
-      description: "Pure and healthy ghee.",
-      price: "₹550 / litre"
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const response = await fetch("http://localhost:5001/v1/products");
+        const result = await response.json();
+
+        if (!response.ok) {
+          setError(result.message || "Products load nahi hue");
+          return;
+        }
+
+        setProducts(result.data);
+      } catch (err) {
+        setError("Server se connect nahi ho paya");
+      } finally {
+        setLoading(false);
+      }
     }
-  ];
+
+    loadProducts();
+  }, []);
 
   const filteredProducts =
     category === "All"
       ? products
       : products.filter(
-          (product) => product.category === category
+          (product) => product.name.toLowerCase().includes(category.toLowerCase())
         );
 
-  const addToWishlist = (product) => {
-    setWishlist((prev) => {
-      if (prev.includes(product)) {
-        return prev;
-      }
-
-      return [...prev, product];
-    });
+  const addToWishlist = (name) => {
+    setWishlist((prev) => (prev.includes(name) ? prev : [...prev, name]));
   };
 
   return (
     <div className="products">
-
       <h1>Our Dairy Products</h1>
 
       <p className="products-intro">
@@ -78,78 +60,38 @@ function Products({ addToCart }) {
 
       {/* Filter Buttons */}
       <div className="filter-buttons">
-
-        <button
-  className={category === "All" ? "active-filter" : ""}
-  onClick={() => setCategory("All")}
->
-  All
-</button>
-  <button
-    className={category === "Milk" ? "active-filter" : ""}
-    onClick={() => setCategory("Milk")}
-  >
-    Milk
-  </button>
-
-  <button
-    className={category === "Curd" ? "active-filter" : ""}
-    onClick={() => setCategory("Curd")}
-  >
-    Curd
-  </button>
-
-  <button
-    className={category === "Paneer" ? "active-filter" : ""}
-    onClick={() => setCategory("Paneer")}
-  >
-    Paneer
-  </button>
-
-  <button
-    className={category === "Butter" ? "active-filter" : ""}
-    onClick={() => setCategory("Butter")}
-  >
-    Butter
-  </button>
-
-  <button
-    className={category === "Ghee" ? "active-filter" : ""}
-    onClick={() => setCategory("Ghee")}
-  >
-    Ghee
-  </button>
-
-
-        
-  
-        
-
+        {categories.map((item) => (
+          <button
+            key={item}
+            className={category === item ? "active-filter" : ""}
+            onClick={() => setCategory(item)}
+          >
+            {item}
+          </button>
+        ))}
       </div>
+
+      {loading && <p>Loading products...</p>}
+      {error && <p>{error}</p>}
+      {!loading && !error && filteredProducts.length === 0 && (
+        <p>Koi product nahi mila.</p>
+      )}
 
       {/* Product List */}
       <div className="product-list">
-
         {filteredProducts.map((product) => (
-
-          <div
-            className="product-card"
-            key={product.name}
-          >
-
+          <div className="product-card" key={product.id}>
             {/* Wishlist */}
             <button
               className="wishlist-btn"
               onClick={() => addToWishlist(product.name)}
             >
-              {wishlist.includes(product.name)
-                ? "♥"
-                : "♡"}
+              {wishlist.includes(product.name) ? "♥" : "♡"}
             </button>
 
             {/* Product Image */}
             <div className="product-image">
-              {product.image}
+              {emojiByName[product.name.toLowerCase()] || "🥛"}
             </div>
 
             {/* Product Name */}
@@ -159,25 +101,23 @@ function Products({ addToCart }) {
             <p>{product.description}</p>
 
             {/* Price */}
-            <strong>{product.price}</strong>
+            <strong>₹{Number(product.price)}</strong>
+
+            {product.stock === 0 && <p>Out of stock</p>}
 
             {/* Add To Cart */}
             <button
               className="add-cart-btn"
+              disabled={product.stock === 0}
               onClick={() => addToCart(product.name)}
             >
               Add to Cart
             </button>
-
           </div>
-
         ))}
-
       </div>
-
     </div>
   );
 }
 
 export default Products;
-

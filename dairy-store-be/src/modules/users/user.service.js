@@ -3,15 +3,19 @@ const bcrypt = require("bcrypt");
 const userRepository = require("./user.repository");
 
 const createUser = async (data) => {
-const hashedPassword = await bcrypt.hash(data.password, 10);
+  if (!data.name || !data.email || !data.password) {
+    const err = new Error("Name, email and password are required");
+    err.status = 400;
+    throw err;
+  }
+
+  const hashedPassword = await bcrypt.hash(data.password, 10);
 
   return userRepository.createUser({
     ...data,
     password: hashedPassword
   });
-
 };
-
 
 const updateUser = async (id, data) => {
   const updated = await userRepository.updateUser(id, data);
@@ -23,15 +27,20 @@ const updateUser = async (id, data) => {
   return updated;
 };
 
-
-
 const findUserById = async (id) => {
   return await userRepository.findUserById(id);
 };
-const createnewUser=async(data)=>{
-    const hashedPassword = await bcrypt.hash(data.password, 10);
 
-    return await userRepository.createnewUser({
+const createnewUser = async (data) => {
+  if (!data.name || !data.email || !data.password) {
+    const err = new Error("Name, email and password are required");
+    err.status = 400;
+    throw err;
+  }
+
+  const hashedPassword = await bcrypt.hash(data.password, 10);
+
+  return await userRepository.createnewUser({
     ...data,
     password: hashedPassword
   });
@@ -46,6 +55,7 @@ const deleteUserById = async (id) => {
   }
   return deleted;
 };
+
 const deleteUserByName = async (name) => {
   const deleted = await userRepository.DeleteUserBYName(name);
   if (!deleted) {
@@ -55,8 +65,9 @@ const deleteUserByName = async (name) => {
   }
   return deleted;
 };
+
 const deleteUserByLimit = async (limit) => {
-  const deleted = await userRepository.DeleteUserBYLimit(limit);  
+  const deleted = await userRepository.DeleteUserBYLimit(limit);
   if (!deleted) {
     const err = new Error("No users found to delete");
     err.status = 404;
@@ -64,9 +75,11 @@ const deleteUserByLimit = async (limit) => {
   }
   return deleted;
 };
-const finduserBYName=async(name)=>{
+
+const finduserBYName = async (name) => {
   return await userRepository.finduserBYName(name);
-}
+};
+
 const login = async ({ email, password }) => {
   if (!email || !password) {
     const err = new Error("Email and password are required");
@@ -83,10 +96,10 @@ const login = async ({ email, password }) => {
   }
 
   const token = jwt.sign(
-    { id: user.id, email: user.email },
-    process.env.JWT_SECRET,
-    { expiresIn: "1d" }
-  );
+  { id: user.id, email: user.email, role: user.role },
+  process.env.JWT_SECRET,
+  { expiresIn: "1d" }
+);
 
   const { password: _, ...safeUser } = user;
   return { user: safeUser, token };
