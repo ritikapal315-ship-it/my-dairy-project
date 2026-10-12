@@ -31,22 +31,19 @@ const updateUser = async (req, res) => {
 
 const findUserById = async (req, res) => {
   try {
+    if (Number(req.params.id) !== req.user.id) {
+      return res.status(403).json({ message: "You can view only your own account" });
+    }
+
     const user = await userService.findUserById(req.params.id);
 
     if (!user) {
-      return res.status(404).json({
-        message: "User not found"
-      });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json({
-      message: "User found",
-      data: user
-    });
+    res.status(200).json({ message: "User found", data: user });
   } catch (err) {
-    res.status(err.status || 500).json({
-      message: err.message
-    });
+    res.status(err.status || 500).json({ message: err.message });
   }
 };
 
@@ -79,58 +76,6 @@ const deleteUserById = async (req, res) => {
   }
 };
 
-const deleteUserByName = async (req, res) => {
-  try {
-    const user = await userService.deleteUserByName(req.params.name);
-
-    res.status(200).json({
-      message: "User deleted",
-      data: user
-    });
-  } catch (err) {
-    res.status(err.status || 500).json({
-      message: err.message
-    });
-  }
-};
-
-const deleteUserByLimit = async (req, res) => {
-  try {
-    const limit = parseInt(req.params.limit, 10);
-    const user = await userService.deleteUserByLimit(limit);
-
-    res.status(200).json({
-      message: "User deleted",
-      data: user
-    });
-  } catch (err) {
-    res.status(err.status || 500).json({
-      message: err.message
-    });
-  }
-};
-
-const finduserBYName = async (req, res) => {
-  try {
-    const user = await userService.finduserBYName(req.params.name);
-
-    if (!user) {
-      return res.status(404).json({
-        message: "User not found"
-      });
-    }
-
-    res.status(200).json({
-      message: "User found",
-      data: user
-    });
-  } catch (err) {
-    res.status(err.status || 500).json({
-      message: err.message
-    });
-  }
-};
-
 const login = async (req, res) => {
   try {
     const { user, token } = await userService.login(req.body);
@@ -151,8 +96,5 @@ module.exports = {
   findUserById,
   createnewUser,
   login,
-  deleteUserById,
-  deleteUserByName,
-  deleteUserByLimit,
-  finduserBYName
+  deleteUserById
 };

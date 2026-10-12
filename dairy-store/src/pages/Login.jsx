@@ -26,7 +26,7 @@ function Login() {
       localStorage.setItem("loggedInUser", JSON.stringify(result.data));
       localStorage.setItem("token", result.token);
       alert("Login successful!");
-      navigate("/");
+     window.location.href = "/";
     } catch (error) {
       alert("Server se connect nahi ho paya");
     }

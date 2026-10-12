@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+const API = "http://localhost:5001/v1";
 const categories = ["All", "Milk", "Curd", "Paneer", "Butter", "Ghee"];
 
 const emojiByName = {
@@ -11,16 +12,18 @@ const emojiByName = {
 };
 
 function Products({ addToCart }) {
-  const [wishlist, setWishlist] = useState([]);
+  const [wishlistIds, setWishlistIds] = useState([]);
   const [category, setCategory] = useState("All");
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    async function loadProducts() {
+    async function loadData() {
+      const token = localStorage.getItem("token");
+
       try {
-        const response = await fetch("http://localhost:5001/v1/products");
+        const response = await fetch(`${API}/products`);
         const result = await response.json();
 
         if (!response.ok) {
@@ -29,6 +32,23 @@ function Products({ addToCart }) {
         }
 
         setProducts(result.data);
+
+        // Wishlist alag se laao, fail ho to bhi products dikhein
+        if (token) {
+          try {
+            const wishResponse = await fetch(`${API}/wishlist`, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            const wishResult = await wishResponse.json();
+
+            if (wishResponse.ok) {
+              // item.id = product ki id
+              setWishlistIds(wishResult.data.map((item) => item.id));
+            }
+          } catch (err) {
+            // wishlist load na ho to bhi page chalega
+          }
+        }
       } catch (err) {
         setError("Server se connect nahi ho paya");
       } finally {
@@ -36,19 +56,62 @@ function Products({ addToCart }) {
       }
     }
 
-    loadProducts();
+    loadData();
   }, []);
+
+  async function toggleWishlist(productId) {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      window.location.href = "/login";
+      return;
+    }
+
+    const alreadySaved = wishlistIds.includes(productId);
+
+    try {
+      const response = await fetch(
+        alreadySaved ? `${API}/wishlist/${productId}` : `${API}/wishlist`,
+        {
+          method: alreadySaved ? "DELETE" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: alreadySaved ? undefined : JSON.stringify({ productId })
+        }
+      );
+
+      const result = await response.json();
+
+      if (response.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("loggedInUser");
+        window.location.href = "/login";
+        return;
+      }
+
+      if (!response.ok) {
+        alert(result.message || "Wishlist update nahi hui");
+        return;
+      }
+
+      setWishlistIds((prev) =>
+        alreadySaved
+          ? prev.filter((id) => id !== productId)
+          : [...prev, productId]
+      );
+    } catch (err) {
+      alert("Server se connect nahi ho paya");
+    }
+  }
 
   const filteredProducts =
     category === "All"
       ? products
-      : products.filter(
-          (product) => product.name.toLowerCase().includes(category.toLowerCase())
+      : products.filter((product) =>
+          product.name.toLowerCase().includes(category.toLowerCase())
         );
-
-  const addToWishlist = (name) => {
-    setWishlist((prev) => (prev.includes(name) ? prev : [...prev, name]));
-  };
 
   return (
     <div className="products">
@@ -84,23 +147,18 @@ function Products({ addToCart }) {
             {/* Wishlist */}
             <button
               className="wishlist-btn"
-              onClick={() => addToWishlist(product.name)}
+              onClick={() => toggleWishlist(product.id)}
             >
-              {wishlist.includes(product.name) ? "♥" : "♡"}
+              {wishlistIds.includes(product.id) ? "♥" : "♡"}
             </button>
 
             {/* Product Image */}
             <div className="product-image">
-              {emojiByName[product.name.toLowerCase()] || "🥛"}
+              {emojiByName[product.name.toLowerCase()] || "🫙"}
             </div>
 
-            {/* Product Name */}
             <h2>{product.name}</h2>
-
-            {/* Description */}
             <p>{product.description}</p>
-
-            {/* Price */}
             <strong>₹{Number(product.price)}</strong>
 
             {product.stock === 0 && <p>Out of stock</p>}
@@ -109,7 +167,7 @@ function Products({ addToCart }) {
             <button
               className="add-cart-btn"
               disabled={product.stock === 0}
-              onClick={() => addToCart(product.name)}
+              onClick={() => addToCart(product.id)}
             >
               Add to Cart
             </button>

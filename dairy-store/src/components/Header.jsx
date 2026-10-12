@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function Header({ cart }) {
   const totalItems = cart.reduce(
@@ -10,14 +10,21 @@ function Header({ cart }) {
   const [loggedInUser, setLoggedInUser] = useState(
     localStorage.getItem("loggedInUser")
   );
-  const navigate = useNavigate();
+
+  // loggedInUser string hai, usme se role nikalne ke liye parse karte hain
+  let user = null;
+  try {
+    user = loggedInUser ? JSON.parse(loggedInUser) : null;
+  } catch (err) {
+    user = null;
+  }
 
   function handleLogout() {
     localStorage.removeItem("loggedInUser");
     localStorage.removeItem("token");
     setLoggedInUser(null);
     alert("Logged out successfully!");
-    navigate("/login");
+    window.location.href = "/login";
   }
 
   return (
@@ -30,6 +37,8 @@ function Header({ cart }) {
         <Link to="/about">About</Link>
         <Link to="/contact">Contact</Link>
         <Link to="/my-products">My Wishes Product</Link>
+        {loggedInUser && <Link to="/my-orders">My Orders</Link>}
+        {user && user.role === "admin" && <Link to="/admin">Admin</Link>}
         <Link to="/ghee">Ghee</Link>
 
         {loggedInUser ? (

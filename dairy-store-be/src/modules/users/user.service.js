@@ -2,11 +2,15 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const userRepository = require("./user.repository");
 
+const fail = (message, status) => {
+  const err = new Error(message);
+  err.status = status;
+  return err;
+};
+
 const createUser = async (data) => {
   if (!data.name || !data.email || !data.password) {
-    const err = new Error("Name, email and password are required");
-    err.status = 400;
-    throw err;
+    throw fail("Name, email and password are required", 400);
   }
 
   const hashedPassword = await bcrypt.hash(data.password, 10);
@@ -18,11 +22,27 @@ const createUser = async (data) => {
 };
 
 const updateUser = async (id, data) => {
-  const updated = await userRepository.updateUser(id, data);
+  const { name, mobile_number } = data;
+
+  if (name !== undefined && String(name).trim() === "") {
+    throw fail("Name cannot be empty", 400);
+  }
+
+  if (
+    mobile_number !== undefined &&
+    mobile_number !== "" &&
+    !/^\d{10}$/.test(String(mobile_number))
+  ) {
+    throw fail("Mobile number must be 10 digits", 400);
+  }
+
+  const updated = await userRepository.updateUser(id, {
+    ...data,
+    name: name !== undefined ? String(name).trim() : undefined
+  });
+
   if (!updated) {
-    const err = new Error("User not found");
-    err.status = 404;
-    throw err;
+    throw fail("User not found", 404);
   }
   return updated;
 };
@@ -33,9 +53,7 @@ const findUserById = async (id) => {
 
 const createnewUser = async (data) => {
   if (!data.name || !data.email || !data.password) {
-    const err = new Error("Name, email and password are required");
-    err.status = 400;
-    throw err;
+    throw fail("Name, email and password are required", 400);
   }
 
   const hashedPassword = await bcrypt.hash(data.password, 10);
@@ -49,57 +67,27 @@ const createnewUser = async (data) => {
 const deleteUserById = async (id) => {
   const deleted = await userRepository.DeleteUserBYID(id);
   if (!deleted) {
-    const err = new Error("User not found");
-    err.status = 404;
-    throw err;
+    throw fail("User not found", 404);
   }
   return deleted;
-};
-
-const deleteUserByName = async (name) => {
-  const deleted = await userRepository.DeleteUserBYName(name);
-  if (!deleted) {
-    const err = new Error("User not found");
-    err.status = 404;
-    throw err;
-  }
-  return deleted;
-};
-
-const deleteUserByLimit = async (limit) => {
-  const deleted = await userRepository.DeleteUserBYLimit(limit);
-  if (!deleted) {
-    const err = new Error("No users found to delete");
-    err.status = 404;
-    throw err;
-  }
-  return deleted;
-};
-
-const finduserBYName = async (name) => {
-  return await userRepository.finduserBYName(name);
 };
 
 const login = async ({ email, password }) => {
   if (!email || !password) {
-    const err = new Error("Email and password are required");
-    err.status = 400;
-    throw err;
+    throw fail("Email and password are required", 400);
   }
 
   const user = await userRepository.findUserByEmail(email);
 
   if (!user || !(await bcrypt.compare(password, user.password))) {
-    const err = new Error("Invalid email or password");
-    err.status = 401;
-    throw err;
+    throw fail("Invalid email or password", 401);
   }
 
   const token = jwt.sign(
-  { id: user.id, email: user.email, role: user.role },
-  process.env.JWT_SECRET,
-  { expiresIn: "1d" }
-);
+    { id: user.id, email: user.email, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: "1d" }
+  );
 
   const { password: _, ...safeUser } = user;
   return { user: safeUser, token };
@@ -109,10 +97,7 @@ module.exports = {
   createUser,
   updateUser,
   findUserById,
-  login,
   createnewUser,
   deleteUserById,
-  deleteUserByName,
-  finduserBYName,
-  deleteUserByLimit
+  login
 };

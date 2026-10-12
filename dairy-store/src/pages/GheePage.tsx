@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import GheeCard from "../components/GheeCard";
 
 type Product = {
@@ -9,10 +10,15 @@ type Product = {
   description: string | null;
 };
 
-function GheePage() {
+type Props = {
+  addToCart: (productId: number) => Promise<void> | void;
+};
+
+function GheePage({ addToCart }: Props) {
   const [gheeList, setGheeList] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function loadGhee() {
@@ -40,8 +46,20 @@ function GheePage() {
     loadGhee();
   }, []);
 
-  const handleBuy = (name: string) => {
-    console.log(name + " bought");
+  // Buy Now: cart mein daalo, phir cart page par bhejo
+  const handleBuy = async (ghee: Product) => {
+    if (!localStorage.getItem("token")) {
+      navigate("/login");
+      return;
+    }
+
+    if (ghee.stock === 0) {
+      alert(`${ghee.name} abhi out of stock hai`);
+      return;
+    }
+
+    await addToCart(ghee.id);
+    navigate("/cart");
   };
 
   return (
@@ -60,7 +78,7 @@ function GheePage() {
             key={ghee.id}
             name={ghee.name}
             price={Number(ghee.price)}
-            onBuy={handleBuy}
+            onBuy={() => handleBuy(ghee)}
           />
         ))}
       </div>
