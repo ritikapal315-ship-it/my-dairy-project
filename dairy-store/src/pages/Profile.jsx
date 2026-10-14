@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Profile.css";
@@ -39,8 +40,8 @@ function Profile() {
         address: userData.address || "",
       });
     } catch (error) {
-      console.error("Unable to read user data:", error);
-      setMessage("Unable to load profile information.");
+      console.error("Profile loading error:", error);
+      setMessage("Unable to load profile.");
     } finally {
       setLoading(false);
     }
@@ -55,19 +56,41 @@ function Profile() {
     }));
   }
 
+  function handleEdit() {
+    setMessage("");
+    setEditing(true);
+  }
+
+  function handleCancel() {
+    setFormData({
+      name: user?.name || "",
+      email: user?.email || "",
+      mobile_number: user?.mobile_number || "",
+      address: user?.address || "",
+    });
+
+    setEditing(false);
+    setMessage("");
+  }
+
   async function handleUpdate(event) {
     event.preventDefault();
-    setMessage("");
 
     if (!user?.id) {
       setMessage("User ID not found. Please log in again.");
       return;
     }
 
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      setMessage("Login token not found. Please log in again.");
+      return;
+    }
+
     try {
       setSaving(true);
-
-      const token = localStorage.getItem("token");
+      setMessage("");
 
       const response = await fetch(
         `http://localhost:5001/v1/update-user/${user.id}`,
@@ -75,9 +98,7 @@ function Profile() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            ...(token
-              ? { Authorization: `Bearer ${token}` }
-              : {}),
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(formData),
         }
@@ -86,7 +107,9 @@ function Profile() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || "Profile update failed.");
+        throw new Error(
+          result.message || "Profile update failed."
+        );
       }
 
       const updatedUser = {
@@ -96,14 +119,30 @@ function Profile() {
       };
 
       setUser(updatedUser);
+      setFormData({
+        name: updatedUser.name || "",
+        email: updatedUser.email || "",
+        mobile_number: updatedUser.mobile_number || "",
+        address: updatedUser.address || "",
+      });
+
+      const storedUser = JSON.parse(
+        localStorage.getItem("loggedInUser") || "{}"
+      );
+
+      const updatedStoredUser = storedUser.user
+        ? { ...storedUser, user: updatedUser }
+        : updatedUser;
+
       localStorage.setItem(
         "loggedInUser",
-        JSON.stringify(updatedUser)
+        JSON.stringify(updatedStoredUser)
       );
 
       setEditing(false);
       setMessage("Profile updated successfully!");
     } catch (error) {
+      console.error("Profile update error:", error);
       setMessage(error.message || "Something went wrong.");
     } finally {
       setSaving(false);
@@ -115,7 +154,11 @@ function Profile() {
   }
 
   if (!user) {
-    return <div className="profile-loading">{message}</div>;
+    return (
+      <div className="profile-loading">
+        {message || "Profile could not be loaded."}
+      </div>
+    );
   }
 
   return (
@@ -134,6 +177,7 @@ function Profile() {
 
         {message && (
           <p
+            role="status"
             className={
               message.includes("successfully")
                 ? "profile-message success"
@@ -153,7 +197,7 @@ function Profile() {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              disabled={!editing}
+              readOnly={!editing}
               required
             />
           </div>
@@ -166,7 +210,7 @@ function Profile() {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              disabled={!editing}
+              readOnly={!editing}
               required
             />
           </div>
@@ -179,7 +223,7 @@ function Profile() {
               name="mobile_number"
               value={formData.mobile_number}
               onChange={handleChange}
-              disabled={!editing}
+              readOnly={!editing}
             />
           </div>
 
@@ -190,48 +234,39 @@ function Profile() {
               name="address"
               value={formData.address}
               onChange={handleChange}
-              disabled={!editing}
-              rows="3"
+              readOnly={!editing}
+              rows={3}
             />
           </div>
 
           <div className="profile-actions">
-            {editing ? (
-              <>
-                <button
-                  type="submit"
-                  className="profile-save-btn"
-                  disabled={saving}
-                >
-                  {saving ? "Saving..." : "Save Changes"}
-                </button>
+            <button
+              type="button"
+              className="profile-edit-btn"
+              hidden={editing}
+              onClick={handleEdit}
+            >
+              Edit Profile
+            </button>
 
-                <button
-                  type="button"
-                  className="profile-cancel-btn"
-                  onClick={() => {
-                    setFormData({
-                      name: user.name || "",
-                      email: user.email || "",
-                      mobile_number: user.mobile_number || "",
-                      address: user.address || "",
-                    });
-                    setEditing(false);
-                    setMessage("");
-                  }}
-                >
-                  Cancel
-                </button>
-              </>
-            ) : (
-              <button
-                type="button"
-                className="profile-edit-btn"
-                onClick={() => setEditing(true)}
-              >
-                Edit Profile
-              </button>
-            )}
+            <button
+              type="submit"
+              className="profile-save-btn"
+              hidden={!editing}
+              disabled={saving}
+            >
+              {saving ? "Saving..." : "Save Changes"}
+            </button>
+
+            <button
+              type="button"
+              className="profile-cancel-btn"
+              hidden={!editing}
+              disabled={saving}
+              onClick={handleCancel}
+            >
+              Cancel
+            </button>
           </div>
         </form>
       </div>
