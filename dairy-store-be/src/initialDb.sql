@@ -59,3 +59,8 @@ CREATE TABLE order_items (
   price NUMERIC(10, 2) NOT NULL,
   quantity INTEGER NOT NULL CHECK (quantity > 0)
 );
+ALTER TABLE orders ADD COLUMN payment_method VARCHAR(20) NOT NULL DEFAULT 'cod';
+ALTER TABLE orders ADD COLUMN payment_status VARCHAR(20) NOT NULL DEFAULT 'pending';
+
+-- Purane delivered orders ko paid maan lo (optional)
+UPDATE orders SET payment_status = 'paid' WHERE status = 'delivered';

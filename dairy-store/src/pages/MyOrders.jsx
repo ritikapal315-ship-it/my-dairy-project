@@ -94,6 +94,13 @@ function MyOrders() {
           </ul>
 
           <p>Delivery: {order.address}</p>
+
+          <p>
+            Payment:{" "}
+            {order.payment_method === "online" ? "Online" : "Cash on Delivery"}{" "}
+            ({order.payment_status || "pending"})
+          </p>
+
           <strong>Total: ₹{Number(order.total)}</strong>
 
           {order.status === "placed" && (

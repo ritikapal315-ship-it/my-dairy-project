@@ -21,7 +21,7 @@ function Cart({ cart, updateQuantity, removeFromCart, placeOrder }) {
     }
 
     setPlacing(true);
-    const ok = await placeOrder(address.trim());
+    const ok = await placeOrder(address.trim(), "cod");
     setPlacing(false);
 
     if (ok) setAddress("");
@@ -83,6 +83,10 @@ function Cart({ cart, updateQuantity, removeFromCart, placeOrder }) {
               onChange={(event) => setAddress(event.target.value)}
               rows={3}
             />
+
+            <p>
+              <b>Payment:</b> Cash on Delivery
+            </p>
 
             <button onClick={handlePlaceOrder} disabled={placing}>
               {placing ? "Placing order..." : "Place Order"}

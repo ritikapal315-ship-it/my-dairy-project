@@ -7,7 +7,7 @@ const fail = (message, status) => {
 };
 
 // Cart se order banao: sab kuch ek transaction mein
-const createOrderFromCart = async (userId, address) => {
+const createOrderFromCart = async (userId, address, paymentMethod) => {
   const client = await pool.connect();
 
   try {
@@ -37,10 +37,10 @@ const createOrderFromCart = async (userId, address) => {
     );
 
     const { rows } = await client.query(
-      `INSERT INTO orders (user_id, total, address)
-       VALUES ($1, $2, $3)
-       RETURNING id, total, address, status, created_at`,
-      [userId, total.toFixed(2), address]
+      `INSERT INTO orders (user_id, total, address, payment_method)
+       VALUES ($1, $2, $3, $4)
+       RETURNING id, total, address, status, payment_method, payment_status, created_at`,
+      [userId, total.toFixed(2), address, paymentMethod]
     );
     const order = rows[0];
 
@@ -80,7 +80,8 @@ const createOrderFromCart = async (userId, address) => {
 
 const getOrdersByUser = async (userId) => {
   const { rows } = await pool.query(
-    `SELECT o.id, o.total, o.address, o.status, o.created_at,
+    `SELECT o.id, o.total, o.address, o.status,
+            o.payment_method, o.payment_status, o.created_at,
             COALESCE(
               json_agg(
                 json_build_object(
@@ -105,7 +106,8 @@ const getOrdersByUser = async (userId) => {
 const getAllOrders = async () => {
   const { rows } = await pool.query(
     `SELECT o.id, o.user_id, u.name AS customer_name, u.email AS customer_email,
-            o.total, o.address, o.status, o.created_at,
+            o.total, o.address, o.status,
+            o.payment_method, o.payment_status, o.created_at,
             COALESCE(
               json_agg(
                 json_build_object(
@@ -126,12 +128,18 @@ const getAllOrders = async () => {
   return rows;
 };
 
-// Cancelled order ka status admin nahi badal sakta
+// Cancelled order ka status admin nahi badal sakta.
+// COD order delivered hote hi paid ho jata hai (cash mil gaya).
 const updateOrderStatus = async (orderId, status) => {
   const { rows } = await pool.query(
-    `UPDATE orders SET status = $1
+    `UPDATE orders
+     SET status = $1::varchar,
+         payment_status = CASE
+           WHEN $1::varchar = 'delivered' AND payment_method = 'cod' THEN 'paid'
+           ELSE payment_status
+         END
      WHERE id = $2 AND status <> 'cancelled'
-     RETURNING id, status`,
+     RETURNING id, status, payment_status`,
     [status, orderId]
   );
   return rows[0];

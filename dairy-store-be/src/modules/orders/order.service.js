@@ -1,6 +1,7 @@
 const orderRepository = require("./order.repository");
 
 const STATUSES = ["placed", "shipped", "delivered"];
+const PAYMENT_METHODS = ["cod", "online"];
 
 const fail = (message, status) => {
   const err = new Error(message);
@@ -16,12 +17,21 @@ const parseId = (value) => {
   return id;
 };
 
-const placeOrder = async (userId, { address }) => {
+const placeOrder = async (userId, { address, paymentMethod }) => {
   if (!address || String(address).trim() === "") {
     throw fail("Delivery address is required", 400);
   }
 
-  return await orderRepository.createOrderFromCart(userId, String(address).trim());
+  const method = paymentMethod || "cod";
+  if (!PAYMENT_METHODS.includes(method)) {
+    throw fail("Payment method must be cod or online", 400);
+  }
+
+  return await orderRepository.createOrderFromCart(
+    userId,
+    String(address).trim(),
+    method
+  );
 };
 
 const getMyOrders = async (userId) => {

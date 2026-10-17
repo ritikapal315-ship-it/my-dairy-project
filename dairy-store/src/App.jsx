@@ -51,6 +51,13 @@ async function cartRequest(url, options = {}) {
 
 function App() {
   const [cart, setCart] = useState([]);
+  const [toast, setToast] = useState("");
+
+  // Chhota message dikhao, 2 second baad hata do
+  function showToast(text) {
+    setToast(text);
+    setTimeout(() => setToast(""), 2000);
+  }
 
   async function loadCart() {
     if (!localStorage.getItem("token")) {
@@ -83,6 +90,7 @@ function App() {
         body: JSON.stringify({ product_id: productId, quantity: 1 }),
       });
       await loadCart();
+      showToast("Added to cart");
     } catch (err) {
       alert(err.message);
     }
@@ -96,21 +104,20 @@ function App() {
       alert(err.message);
     }
   }
-
-  async function placeOrder(address) {
-    try {
-      const result = await cartRequest(ORDER_API, {
-        method: "POST",
-        body: JSON.stringify({ address }),
-      });
-      await loadCart();
-      alert(`Order placed! Total: ₹${Number(result.data.total)}`);
-      return true;
-    } catch (err) {
-      alert(err.message);
-      return false;
-    }
+async function placeOrder(address, paymentMethod) {
+  try {
+    const result = await cartRequest(ORDER_API, {
+      method: "POST",
+      body: JSON.stringify({ address, paymentMethod }),
+    });
+    await loadCart();
+    alert(`Order placed! Total: ₹${Number(result.data.total)}`);
+    return true;
+  } catch (err) {
+    alert(err.message);
+    return false;
   }
+}
 
   async function updateQuantity(productId, newQuantity) {
     if (newQuantity <= 0) {
@@ -132,6 +139,8 @@ function App() {
   return (
     <BrowserRouter>
       <div className="app">
+        {toast && <div className="toast">{toast}</div>}
+
         <Header cart={cart} />
         <main className="main-content">
           <Routes>
@@ -181,22 +190,24 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
             <Route
-  path="/admin"
-  element={
-    <ProtectedRoute>
-      <AdminPage />
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/profile"
-  element={
-    <ProtectedRoute>
-      <Profile />
-    </ProtectedRoute>
-  }
-/>
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
 
             <Route path="/ghee" element={<GheePage addToCart={addToCart} />} />
           </Routes>

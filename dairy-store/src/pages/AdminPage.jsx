@@ -73,6 +73,7 @@ function AdminPage() {
   const [tab, setTab] = useState("products");
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [messages, setMessages] = useState([]);
   const [form, setForm] = useState({
     name: "",
     price: "",
@@ -99,15 +100,21 @@ function AdminPage() {
     setOrders(result.data);
   }
 
+  async function loadMessages() {
+    const result = await api("/messages");
+    setMessages(result.data);
+  }
+
   function showError(err) {
     setMessage(err.message);
   }
 
-  // Page khulte hi dono load karo
+  // Page khulte hi teeno load karo
   useEffect(() => {
     if (!isAdmin) return;
     loadProducts().catch(showError);
     loadOrders().catch(showError);
+    loadMessages().catch(showError);
   }, [isAdmin]);
 
   if (!isAdmin) return <Navigate to="/" />;
@@ -116,8 +123,9 @@ function AdminPage() {
   function openTab(name) {
     setTab(name);
     setMessage("");
-    if (name === "orders") loadOrders().catch(showError);
     if (name === "products") loadProducts().catch(showError);
+    if (name === "orders") loadOrders().catch(showError);
+    if (name === "messages") loadMessages().catch(showError);
   }
 
   async function addProduct(event) {
@@ -194,6 +202,13 @@ function AdminPage() {
           onClick={() => openTab("orders")}
         >
           Orders ({orders.length})
+        </button>
+
+        <button
+          className={tab === "messages" ? "active-filter" : ""}
+          onClick={() => openTab("messages")}
+        >
+          Messages ({messages.length})
         </button>
 
         <button onClick={() => openTab(tab)}>Refresh</button>
@@ -285,21 +300,56 @@ function AdminPage() {
               </ul>
 
               <p>Delivery: {order.address}</p>
+
+              <p>
+                Payment:{" "}
+                {order.payment_method === "online"
+                  ? "Online"
+                  : "Cash on Delivery"}{" "}
+                ({order.payment_status || "pending"})
+              </p>
+
               <strong>Total: ₹{Number(order.total)}</strong>
 
               <p>
                 Status:{" "}
-                <select
-                  value={order.status}
-                  onChange={(e) => changeStatus(order.id, e.target.value)}
-                >
-                  {STATUSES.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
-                  ))}
-                </select>
+                {order.status === "cancelled" ? (
+                  <b>cancelled</b>
+                ) : (
+                  <select
+                    value={order.status}
+                    onChange={(e) => changeStatus(order.id, e.target.value)}
+                  >
+                    {STATUSES.map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </p>
+            </div>
+          ))}
+        </>
+      )}
+
+      {tab === "messages" && (
+        <>
+          <h2>Customer Messages</h2>
+          {messages.length === 0 && <p>Abhi koi sandesh nahi aaya.</p>}
+
+          {messages.map((item) => (
+            <div className="order-card" key={item.id}>
+              <h3>{item.name}</h3>
+              <p>
+                {item.email} |{" "}
+                {new Date(item.created_at).toLocaleDateString("en-IN", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric"
+                })}
+              </p>
+              <p>{item.message}</p>
             </div>
           ))}
         </>
